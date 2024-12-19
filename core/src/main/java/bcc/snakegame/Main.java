@@ -76,24 +76,31 @@ public class Main extends InputAdapter implements ApplicationListener {
         if (gameOver) return false;
         // Update next direction based on arrow keys
         //need to make sure that it won't be doing a 180! For example, we can't go North if curDir is SOUTH
-        if (keycode == Keys.UP) {
-            nextDir = Direction.NORTH;
-        } else if (keycode == Keys.DOWN) {
-            nextDir = Direction.SOUTH;
-        } else if (keycode == Keys.LEFT) {
-            nextDir = Direction.WEST;
-        } else if (keycode == Keys.RIGHT) {
-            nextDir = Direction.EAST;
-        }
-        return true;
+    if (keycode == Keys.UP && curDir != Direction.SOUTH) {
+        nextDir = Direction.NORTH;
+    } else if (keycode == Keys.DOWN && curDir != Direction.NORTH) {
+        nextDir = Direction.SOUTH;
+    } else if (keycode == Keys.LEFT && curDir != Direction.EAST) {
+        nextDir = Direction.WEST;
+    } else if (keycode == Keys.RIGHT && curDir != Direction.WEST) {
+        nextDir = Direction.EAST;
+    }
+    return true;
     }
 
     //checkpoint 1
     private void checkApple() {
         //check if the head of the snake is on the apple
         //if it is, increase score, and use your placeApple() method
+        GridPosition head = snake.get(snake.size() - 1);
 
-        snake.remove(0);//only run this code if there is NO APPLE - this deletes the last snake segment. 
+    if (head.equals(apple)) {
+        score += 1;
+        placeApple();
+    } else {
+        // Remove the tail segment if no apple was eaten
+        snake.remove(0);
+    } 
     }
     
 
@@ -101,7 +108,11 @@ public class Main extends InputAdapter implements ApplicationListener {
     //should return true if the position is located on the snake
     //useful for determining if we have a legal apple position
     private boolean onSnake(GridPosition pos) {
-
+        for (GridPosition segment : snake) {
+            if (segment.equals(pos)) {
+                return true;
+            }
+        }
         return false;
     }
 
@@ -113,7 +124,12 @@ public class Main extends InputAdapter implements ApplicationListener {
         //check that its not on the snake
         //if it is on the snake, try again
         //if not on the snake, set the apple position
-
+        GridPosition newApple;
+        do {
+            newApple = new GridPosition(MathUtils.random(GRID_SIZE - 1), MathUtils.random(GRID_SIZE - 1));
+        } while (onSnake(newApple));
+    
+        apple = newApple;
     }
     
     //checkpoint 2
@@ -125,6 +141,19 @@ public class Main extends InputAdapter implements ApplicationListener {
         // Check hitting itself
 
         // set gameOver to true if we die
+        GridPosition head = snake.get(snake.size() - 1);
+
+    if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE) {
+        gameOver = true;
+        return;
+    }
+
+    for (int i = 0; i < snake.size() - 1; i++) {
+        if (head.equals(snake.get(i))) {
+            gameOver = true;
+            return;
+        }
+    }
     }
 
 
